@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 将视频导入,给它添加属性 -->
+    <!-- 这里通过source属性添加适合不同的浏览器的视频资源地址 -->
+    <!-- source属性会自动选择适合本浏览器的视频源 -->
+  <!-- 自定义一个控制面板 里面有开始/暂停 进度条 当前进度/总进度 音量控制(有声/无声)
+   音量控制条 清晰度控制 -->
+  <!-- 清晰度控制现在的思路:
+   选择不同的清晰度 点击之后读取到当前的进度条存储 同时跳向不同的片源 并让片源从上次获取到的进度条位置开始播放
+   -->
+  <video autoplay controls="controls" width="600px" height="400px" id="videoplayer">
+    <source src="./video/demo03.ogg" type="video/ogg">
+    <source src="./video/demo03_VP8.webm" type="video/webm">
+    <source src="./video/demo03_x264.mp4" type="video/mp4">
+  </video>
+  <div class="controller" style="width:600px;">
+    <button type="button" id="start_btn" onclick="porp()">开始</button>
+    <input type="range" id="video_range" value="0" max="100">
+    <input type="text" id="video_info" disabled="true" style="width:100px;">
+    <button type="button" id="voice_btn">静音</button>
+    <input type="range" id="voice_range" max="100">
+    <button type="button" id="show_menu" onclick="menu()">清晰度</button>
+    <ul id="definition" style="position:relative;left:465px; visibility:hidden" type="none">
+      <li>标清</li>
+      <li>高清</li>
+      <li>超清</li>
+    </ul>
+  </div>
+  <script type="text/javascript">
+    myvideo = document.getElementById("videoplayer");
+    range = document.getElementById("video_range");
+    info = document.getElementById("video_info");
+    video_range = document.getElementById("video_range");
+    voice_btn = document.getElementById("voice_btn");
+    voice_range = document.getElementById("voice_range");
+    function menu(){
+      var mymenu = document.getElementById("definition").style;
+      if(mymenu.visibility === "hidden"){
+        mymenu.visibility = "visible";
+      }else if(mymenu.visibility === "visible"){
+        mymenu.visibility = "hidden";
+      }
+    }
+    // 清晰度选择
+
+    function porp(){
+      var btn = document.getElementById("start_btn");
+      if(myvideo.paused){
+        myvideo.play();
+        btn.innerHTML = "暂停";
+      }else{
+        myvideo.pause();
+        btn.innerHTML = "开始";
+      }
+    }
+    // 暂停或开始
+
+    myvideo.ontimeupdate = function(){
+        var currentTime = Math.round(myvideo.currentTime);
+        var duration = Math.round(myvideo.duration)
+        info.value = currentTime+"/"+duration;
+        video_range.value = currentTime/duration*100;
+        if(myvideo.ended){
+          video_range.value = 0;
+        }
+    }
+    // 进度条和时间面板
+
+    video_range.onmousedown = function(){
+      myvideo.pause();
+    }
+    video_range.onmouseup = function(){
+      myvideo.currentTime = myvideo.duration * (video_range.value/video_range.max);
+      myvideo.play();
+    }
+    //拖动进度条
+
+    voice_btn.onclick = function(){
+      console.log();
+      if(!myvideo.muted){
+        voice_btn.innerHTML = "取消静音";
+				myvideo.muted=true;
+      }else{
+        voice_btn.innerHTML = "静音";
+				myvideo.muted=false;
+      }
+    }
+    // 静音/取消静音
+    myvideo.ontimeupdate = function(){
+      voice_range.value = myvideo.volume * 100;
+    }
+    voice_range.onmouseup = function(){
+      myvideo.volume = 1 * (voice_range.value/voice_range.max);
+    }
+  </script>
+</body>
+</html>
